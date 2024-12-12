@@ -6,7 +6,7 @@
 	export let data: RedditCommentData;
 </script>
 
-<div class="pane">
+<div class="pane" class:removed={data?._meta?.removal_type}>
 	<div class="header">
 		<a href={`https://reddit.com/r/${data.subreddit}`} target="_blank">r/{data.subreddit} </a>
 		<span>by </span>
@@ -22,6 +22,11 @@
 		<span>Source link:&nbsp;</span>
 		<a href={`https://reddit.com${data.permalink}`} target="_blank" class="long-url">{`https://reddit.com${data.permalink}`}</a>
 	</div>
+	{#if data?._meta?.removal_type}
+	<div class="removal-type">
+		<span>Removed:&nbsp;{data._meta.removal_type}</span>
+	</div>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -40,6 +45,19 @@
 			white-space: nowrap;
 			font-size: 0.8rem;
 		}
+	}
+
+	.removal-type {
+		margin-top: 0.5rem;
+
+		> * {
+			white-space: nowrap;
+			font-size: 0.8rem;
+		}
+	}
+
+	.removed {
+		background: var(--user-admin-bg);
 	}
 
 	.body {
