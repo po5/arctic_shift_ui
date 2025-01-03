@@ -4,6 +4,7 @@
     import DateDisplay from "./DateDisplay.svelte";
 
 	export let data: RedditCommentData;
+	export let replies: RedditCommentRepliesData = {};
 </script>
 
 <div class="pane" class:removed={data?._meta?.removal_type}>
@@ -21,11 +22,18 @@
 	<div class="reddit-link">
 		<span>Source link:&nbsp;</span>
 		<a href={`https://www.reddit.com${data.permalink}`} target="_blank" class="long-url">{`https://reddit.com${data.permalink}`}</a>
+		<a href={`/search?fun=thread_search&limit=10&sort=desc&url=https%3A%2F%2Fwww.reddit.com${encodeURIComponent(data.permalink.replace(/(\/comments\/[^/]+\/).*/, '$1'))}`} target="_blank" class="thread-view">[T]</a>
 	</div>
 	{#if data?._meta?.removal_type}
 	<div class="removal-type">
 		<span>Removed:&nbsp;{data._meta.removal_type}</span>
 	</div>
+	{/if}
+
+	{#if data.id in replies}
+		{#each replies[data.id] as reply (reply.id)}
+			<svelte:self data={reply} replies={replies} />
+		{/each}
 	{/if}
 </div>
 

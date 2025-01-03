@@ -5,10 +5,12 @@
     import RedditImagePreview from "./RedditImagePreview.svelte";
 
 	export let data: RedditPostData;
+	export let op: boolean = false;
 </script>
 
 <div class="pane" class:removed={data.removed_by_category}>
 	<div class="header">
+		<span class="op" class:shown={op}>(OP) </span>
 		<a href={`https://www.reddit.com/r/${data.subreddit}`} target="_blank">r/{data.subreddit} </a>
 		<span>by </span>
 		<a href={`https://www.reddit.com/u/${data.author}`} target="_blank">u/{data.author} </a>
@@ -33,6 +35,7 @@
 	<div class="reddit-link">
 		<span>Source link:&nbsp;</span>
 		<a href={`https://www.reddit.com${data.permalink}`} target="_blank" class="long-url">{`https://reddit.com${data.permalink}`}</a>
+		<a href={`/search?fun=thread_search&limit=10&sort=desc&url=https%3A%2F%2Fwww.reddit.com${encodeURIComponent(data.permalink.replace(/(\/comments\/[^/]+\/).*/, '$1'))}`} target="_blank" class="thread-view">[T]</a>
 	</div>
 	{#if data.removed_by_category}
 	<div class="removal-type">
@@ -46,6 +49,10 @@
 		a {
 			color: var(--primary);
 		}
+	}
+
+	.op:not(.shown) {
+		display: none;
 	}
 
 	.title {

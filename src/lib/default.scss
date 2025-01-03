@@ -228,6 +228,14 @@ td code {
   border-radius: 1rem;
 }
 
+.pane > .pane {
+  margin-top: 0.5rem;
+}
+
+.thread-view {
+  width: 2rem;
+}
+
 .home-button {
   img {
     width: 2rem;

@@ -3,6 +3,10 @@
  */
 /** */
 
+export type RedditCommentRepliesData = {
+    [parent_id: string]: RedditCommentData;
+};
+
 export type RedditApiObj = {
 	kind: string,
 	data: RedditApiData,

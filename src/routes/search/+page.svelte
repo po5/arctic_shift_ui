@@ -15,6 +15,8 @@
 		CommentIds="comment_ids",
 		PostsSearch="posts_search",
 		CommentsSearch="comments_search",
+		ThreadSearch="thread_search",
+		RepliesSearch="replies_search",
 	}
 
 	let fun = Function.PostsSearch;
@@ -42,7 +44,8 @@
 	let error: string|null = null;
 	let posts: RedditPostData[]|null = null;
 	let comments: RedditCommentData[]|null = null;
-	$: currentData = fun === Function.PostsSearch ? posts : null ?? fun === Function.CommentsSearch ? comments : null;
+	let replies: RedditCommentRepliesData = {};
+	$: currentData = fun === Function.PostsSearch ? posts : null ?? fun === Function.CommentsSearch ? comments : null ?? fun === Function.ThreadSearch ? comments : null;
 	let previousHistory: string[] = [];
 
 	onMount(() => {
@@ -77,15 +80,16 @@
 		return null;
 	}
 
-	async function search(_: any, clearPrevious = true) {
+	async function search(_: any, clearPrevious = true, activeFun: any = null) {
 		if (clearPrevious)
 			previousHistory = [];
+		activeFun = activeFun ?? fun;
 		error = null;
 		loading = true;
 		const params = new URLSearchParams();
 		let paramNames: [string, string][] = [];
 		let endpoint: string;
-		if (fun == Function.PostsSearch) {
+		if (activeFun == Function.PostsSearch) {
 			endpoint = "posts";
 			paramNames = [
 				["subreddit", subreddit],
@@ -101,8 +105,22 @@
 				["url", url],
 			];
 		}
-		else if (fun == Function.CommentsSearch) {
+		else if (activeFun == Function.CommentsSearch) {
 			endpoint = "comments";
+			paramNames = [
+				["subreddit", subreddit],
+				["author", author],
+				["after", after],
+				["before", before],
+				["limit", _?.limit ?? limit],
+				["sort", sort],
+				["link_id", linkId],
+				["parent_id", parentId],
+				["body", body],
+			];
+		}
+		else if (activeFun == Function.ThreadSearch) {
+			endpoint = "posts";
 			paramNames = [
 				["subreddit", subreddit],
 				["author", author],
@@ -110,8 +128,24 @@
 				["before", before],
 				["limit", limit],
 				["sort", sort],
-				["link_id", linkId],
-				["parent_id", parentId],
+				["over_18", over18 != null ? over18.toString() : ""],
+				["spoiler", spoiler != null ? spoiler.toString() : ""],
+				["title", title],
+				["selftext", selftext],
+				["url", url],
+			];
+		}
+		else if (activeFun == Function.RepliesSearch) {
+			endpoint = "comments";
+			paramNames = [
+				["subreddit", subreddit],
+				["author", author],
+				["after", ""],
+				["before", ""],
+				["limit", _?.limit ?? limit], // TODO: if we got exactly 10 replies, add a "load more" button
+				["sort", sort],
+				["link_id", _?.parentLinkId],
+				["parent_id", _?.parentCommentId],
 				["body", body],
 			];
 		}
@@ -120,17 +154,23 @@
 			loading = false;
 			return;
 		}
-		for (const [name, value] of paramNames) {
-			if (value.length > 0)
-				params.append(name, value);
-		}
 		const ownUrlParams = new URLSearchParams();
 		ownUrlParams.append("fun", fun);
-		for (const [name, value] of params)
-			ownUrlParams.append(name, value);
+		for (const [name, value] of paramNames) {
+			if (name == "parent_id" && value == "0") {
+				params.append(name, "");
+				ownUrlParams.append(name, value);
+			}
+			else if (value.length > 0) {
+				params.append(name, value);
+				ownUrlParams.append(name, value);
+			}
+		}
 		const newOwnUrl = new URL(location.href);
 		newOwnUrl.search = ownUrlParams.toString();
-		history.replaceState(null, "", newOwnUrl.toString());
+		if (fun != Function.ThreadSearch || activeFun == Function.ThreadSearch) {
+			history.replaceState(null, "", newOwnUrl.toString());
+		}
 		params.append("md2html", "true");
 		params.append("meta-app", "search-tool");
 		
@@ -161,10 +201,28 @@
 				loading = false;
 				return;
 			}
-			if (fun == Function.PostsSearch)
+			if (activeFun == Function.PostsSearch || activeFun == Function.ThreadSearch) {
 				posts = data.data;
-			else if (fun == Function.CommentsSearch)
+				if (fun == Function.ThreadSearch) {
+					linkId = posts ? posts[0].id : null
+					parentId = "0"
+					// TODO: don't override global values here ^
+					search({parentLinkId: linkId, parentCommentId: "", limit: 10}, false, Function.CommentsSearch)
+				}
+			}
+			else if (activeFun == Function.CommentsSearch) {
 				comments = data.data;
+				for (const comment of comments) {
+					search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id, limit: 10}, false, Function.RepliesSearch)
+				}
+			}
+			else if (activeFun == Function.RepliesSearch) {
+				for (const reply of data.data) {
+					if (!(_?.parentCommentId in replies)) replies[_?.parentCommentId] = [];
+					replies[_?.parentCommentId].push(reply);
+					search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id, limit: 10}, false, Function.RepliesSearch)
+				}
+			}
 
 		}
 		catch (e) {
@@ -183,6 +241,10 @@
 		else if (fun == Function.CommentsSearch) {
 			data = comments;
 			name = "comments";
+		}
+		else if (fun == Function.ThreadSearch) {
+			data = [posts, comments, replies];
+			name = "thread";
 		}
 		if (!data || !name)
 			return;
@@ -260,6 +322,7 @@
 			options={[
 				{ value: Function.PostsSearch, label: "Posts Search" },
 				{ value: Function.CommentsSearch, label: "Comments Search" },
+				{ value: Function.ThreadSearch, label: "Thread Search" },
 				// { value: Function.PostIds, label: "Post IDs" },
 				// { value: Function.CommentIds, label: "Comment IDs" },
 			]}
@@ -310,7 +373,7 @@
 				bind:selected={sort}
 			/>
 		</div>
-		{#if fun === Function.PostsSearch}
+		{#if fun === Function.PostsSearch || fun === Function.ThreadSearch}
 			<div
 				class="row"
 				class:disabled-row={author.length == 0 && subreddit.length == 0}
@@ -386,7 +449,7 @@
 			>
 				<img src={settingsSvg} alt="settings" />
 			</button>
-			{#if fun === Function.PostsSearch && posts?.length || fun === Function.CommentsSearch && comments?.length}
+			{#if fun === Function.PostsSearch && posts?.length || fun === Function.CommentsSearch && comments?.length || fun === Function.ThreadSearch && posts?.length}
 				<button
 					class="submit-button secondary"
 					on:click={download}
@@ -437,6 +500,21 @@
 			{#each comments as comment (comment.id)}
 				<RedditComment data={comment} />
 			{/each}
+		{:else if fun === Function.ThreadSearch && posts !== null}
+			{#if posts.length == 0}
+				<p>No OP found.</p>
+			{/if}
+			{#each posts as post (post.id)}
+				<RedditPost data={post} op=true />
+			{/each}
+			{#if comments !== null}
+				{#if comments.length == 0}
+					<p>No comments.</p>
+				{/if}
+				{#each comments as comment (comment.id)}
+					<RedditComment data={comment} replies={replies} />
+				{/each}
+			{/if}
 		{/if}
 	</div>
 
