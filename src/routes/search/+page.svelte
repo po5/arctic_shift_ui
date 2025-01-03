@@ -124,9 +124,9 @@
 			paramNames = [
 				["subreddit", subreddit],
 				["author", author],
-				["after", after],
-				["before", before],
-				["limit", limit],
+				["after", ""],
+				["before", ""],
+				["limit", "1"],
 				["sort", sort],
 				["over_18", over18 != null ? over18.toString() : ""],
 				["spoiler", spoiler != null ? spoiler.toString() : ""],
@@ -204,7 +204,7 @@
 			if (activeFun == Function.PostsSearch || activeFun == Function.ThreadSearch) {
 				posts = data.data;
 				if (fun == Function.ThreadSearch) {
-					linkId = posts ? posts[0].id : null
+					linkId = url.replace(/.*?\/comments\//, "").replace(/\/.*/, "")
 					parentId = "0"
 					// TODO: don't override global values here ^
 					search({parentLinkId: linkId, parentCommentId: "", limit: 10}, false, Function.CommentsSearch)
