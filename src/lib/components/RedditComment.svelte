@@ -55,17 +55,27 @@
 		}
 	}
 
+	.removed > .reddit-link, .removed > .removal-type {
+		background: var(--user-admin-bg);
+		margin-left: -0.5rem;
+		padding-left: 0.5rem;
+		margin-right: -0.5rem;
+		padding-right: 0.5rem;
+	}
+
+	.removed > .reddit-link {
+		border-top-left-radius: 0.5rem;
+		border-top-right-radius: 0.5rem;
+	}
+
 	.removal-type {
-		margin-top: 0.5rem;
+		border-bottom-left-radius: 0.5rem;
+		border-bottom-right-radius: 0.5rem;
 
 		> * {
 			white-space: nowrap;
 			font-size: 0.8rem;
 		}
-	}
-
-	.removed {
-		background: var(--user-admin-bg);
 	}
 
 	.body {

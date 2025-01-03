@@ -230,6 +230,37 @@ td code {
 
 .pane > .pane {
   margin-top: 0.5rem;
+  margin-right: calc(-1rem - 1px);
+  margin-bottom: calc(-1rem - 2px);
+  padding-bottom: 0;
+}
+
+.pane > .pane:not(:has(.pane)) {
+    padding-bottom: 1rem;
+}
+
+.pane > .pane ~ .pane {
+  margin-top: calc(1rem + 1px);
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.pane > .pane:not(:last-child) {
+  border-bottom: 0;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.pane > .pane:last-child {
+  margin-bottom: -1px;
+}
+
+.pane > .pane:not(:last-child) > .pane:last-child {
+  border-bottom-right-radius: 0px;
+}
+
+.pane > .pane ~ .pane > .pane {
+    border-top-right-radius: 0px;
 }
 
 .thread-view {
