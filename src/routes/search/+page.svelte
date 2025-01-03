@@ -216,15 +216,20 @@
 			}
 			else if (activeFun == Function.CommentsSearch) {
 				comments = data.data;
-				for (const comment of comments) {
-					search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch)
+				if (comments) {
+					for (const comment of comments) {
+						search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch)
+					}
 				}
 			}
 			else if (activeFun == Function.RepliesSearch) {
-				for (const reply of data.data) {
-					if (!(_?.parentCommentId in replies)) replies[_?.parentCommentId] = [];
-					replies[_?.parentCommentId].push(reply);
-					search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id}, false, Function.RepliesSearch)
+				const replyData = data.data;
+				if (replyData) {
+					for (const reply of replyData) {
+						if (!(_?.parentCommentId in replies)) replies[_?.parentCommentId] = [];
+						replies[_?.parentCommentId].push(reply);
+						search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id}, false, Function.RepliesSearch)
+					}
 				}
 			}
 
@@ -509,7 +514,7 @@
 				<p>No OP found.</p>
 			{/if}
 			{#each posts as post (post.id)}
-				<RedditPost data={post} op=true />
+				<RedditPost data={post} op={true} />
 			{/each}
 			{#if comments !== null}
 				{#if comments.length == 0}
