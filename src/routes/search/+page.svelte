@@ -157,7 +157,11 @@
 		const ownUrlParams = new URLSearchParams();
 		ownUrlParams.append("fun", fun);
 		for (const [name, value] of paramNames) {
-			if (name == "parent_id" && value == "0") {
+			if (activeFun == Function.ThreadSearch && name == "limit") {
+				params.append(name, value);
+				ownUrlParams.append(name, limit);
+			}
+			else if (name == "parent_id" && value == "0") {
 				params.append(name, "");
 				ownUrlParams.append(name, value);
 			}
@@ -207,20 +211,20 @@
 					linkId = url.replace(/.*?\/comments\//, "").replace(/\/.*/, "")
 					parentId = "0"
 					// TODO: don't override global values here ^
-					search({parentLinkId: linkId, parentCommentId: "", limit: 10}, false, Function.CommentsSearch)
+					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch)
 				}
 			}
 			else if (activeFun == Function.CommentsSearch) {
 				comments = data.data;
 				for (const comment of comments) {
-					search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id, limit: 10}, false, Function.RepliesSearch)
+					search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch)
 				}
 			}
 			else if (activeFun == Function.RepliesSearch) {
 				for (const reply of data.data) {
 					if (!(_?.parentCommentId in replies)) replies[_?.parentCommentId] = [];
 					replies[_?.parentCommentId].push(reply);
-					search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id, limit: 10}, false, Function.RepliesSearch)
+					search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id}, false, Function.RepliesSearch)
 				}
 			}
 
