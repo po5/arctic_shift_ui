@@ -218,15 +218,18 @@
 				comments = data.data;
 				if (comments) {
 					for (const comment of comments) {
-						search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch)
+						if (!(comment.id in replies)) {
+							// TODO: proper dedupe for when we allow loading extra replies
+							search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch)
+						}
 					}
 				}
 			}
 			else if (activeFun == Function.RepliesSearch) {
 				const replyData = data.data;
 				if (replyData) {
+					replies[_?.parentCommentId] = [];
 					for (const reply of replyData) {
-						if (!(_?.parentCommentId in replies)) replies[_?.parentCommentId] = [];
 						replies[_?.parentCommentId].push(reply);
 						search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id}, false, Function.RepliesSearch)
 					}

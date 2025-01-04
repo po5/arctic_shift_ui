@@ -30,7 +30,7 @@
 	</div>
 	{/if}
 
-	{#if data.id in replies}
+	{#if replies && data.id in replies && replies[data.id]}
 		{#each replies[data.id] as reply (reply.id)}
 			<svelte:self data={reply} replies={replies} />
 		{/each}
