@@ -165,7 +165,7 @@
 				params.append(name, "");
 				ownUrlParams.append(name, value);
 			}
-			else if (value.length > 0) {
+			else if (value && value.length > 0) {
 				params.append(name, value);
 				ownUrlParams.append(name, value);
 			}
