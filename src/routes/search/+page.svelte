@@ -19,6 +19,69 @@
 		RepliesSearch="replies_search",
 	}
 
+	const appId = "N3bHM42Rmlc3sQ";
+	const authHeader = `Basic ${btoa(appId + ":")}`;
+	const clientId = "syqnq8auSEvxwe2Crb1u";
+	let accessToken = null;
+	let newlyRemoved = {};
+
+	async function fetchRedditAuth(bodyParams, additionalHeaders = {}) {
+		try {
+			const response = await fetch("https://www.reddit.com/api/v1/access_token", {
+				method: "POST",
+				headers: {
+					Authorization: authHeader,
+					"Content-Type": "application/x-www-form-urlencoded",
+					...additionalHeaders,
+				},
+				body: new URLSearchParams(bodyParams),
+			});
+
+			return await response.json();
+		} catch (e) {
+			console.error("Reddit API error", e);
+			return { error: "Error getting access token" };
+		}
+	}
+
+	async function getAccessToken() {
+		const response = await fetchRedditAuth({
+			grant_type: "https://oauth.reddit.com/grants/installed_client",
+			device_id: clientId,
+		});
+		accessToken = response?.access_token;
+		return response;
+	}
+
+	const randomStringAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	function randomString(length: number): string {
+		let randStr = "";
+		for (let i = 0; i < length; ++i)
+			randStr += randomStringAlphabet[Math.floor(Math.random() * randomStringAlphabet.length)];
+		return randStr;
+	}
+
+	async function oauth2Request(path, id, options = {}) {
+		if (!accessToken) return;
+		if (id in newlyRemoved) return;
+		const parameters = new URLSearchParams();
+		parameters.append("sr_detail", "true")
+		parameters.append("raw_json", "1");
+		parameters.append("rand", randomString(10));
+		let fetchOptions = {
+			...options,
+			headers: new Headers({
+				Authorization: `Bearer ${accessToken}`,
+			}),
+		};
+		const response = await fetch(`https://oauth.reddit.com${path}?${parameters.toString()}`, fetchOptions);
+		const json = await response.json();
+		const post = json[0].data.children[0].data;
+		newlyRemoved[id] = post.removed_by_category || post._meta?.removal_type;
+	}
+
+	getAccessToken();
+
 	let fun = Function.PostsSearch;
 	// search parameters
 	let subreddit = "";
@@ -212,6 +275,11 @@
 					parentId = "0"
 					// TODO: don't override global values here ^
 					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch)
+				}
+				for (const post of posts) {
+					if (!(post.removed_by_category || post._meta?.removal_type)) {
+						oauth2Request(post.permalink, post.id);
+					}
 				}
 			}
 			else if (activeFun == Function.CommentsSearch) {
@@ -503,7 +571,7 @@
 				<p>Nothing found o_O</p>
 			{/if}
 			{#each posts as post (post.id)}
-				<RedditPost data={post} />
+				<RedditPost data={post} newlyRemoved={newlyRemoved[post.id] || null} />
 			{/each}
 		{:else if fun === Function.CommentsSearch && comments !== null}
 			{#if comments.length == 0}
@@ -517,7 +585,7 @@
 				<p>No OP found.</p>
 			{/if}
 			{#each posts as post (post.id)}
-				<RedditPost data={post} op={true} />
+				<RedditPost data={post} op={true} newlyRemoved={newlyRemoved[post.id] || null} />
 			{/each}
 			{#if comments !== null}
 				{#if comments.length == 0}
