@@ -198,7 +198,7 @@
 				["author", author],
 				["after", ""],
 				["before", ""],
-				["limit", "1"],
+				["limit", "5"],
 				["sort", sort],
 				["over_18", over18 != null ? over18.toString() : ""],
 				["spoiler", spoiler != null ? spoiler.toString() : ""],
@@ -281,7 +281,12 @@
 				posts = data.data;
 				if (fun == Function.ThreadSearch) {
 					linkId = url.replace(/.*?\/comments\//, "").replace(/\/.*/, "")
-					if (posts !== null && posts.length == 0) oauth2Request(url.replace(/.*?\/r\//, "/r/"), linkId, true)
+					for (const post of posts) {
+						if (post.id == linkId) {
+							posts = [post];
+						}
+					}
+					if (posts !== null && (posts.length == 0 || posts[0].id !== linkId)) oauth2Request(url.replace(/.*?\/r\//, "/r/"), linkId, true)
 					parentId = "0"
 					// TODO: don't override global values here ^
 					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch)
