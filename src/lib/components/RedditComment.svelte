@@ -5,6 +5,11 @@
 
 	export let data: RedditCommentData;
 	export let replies: RedditCommentRepliesData = {};
+
+	function removalReason(reason) {
+		if (reason == "deleted") reason = "deleted by user";
+		return reason;
+	}
 </script>
 
 <div class="pane" class:removed={data?._meta?.removal_type}>
@@ -26,7 +31,7 @@
 	</div>
 	{#if data?._meta?.removal_type}
 	<div class="removal-type">
-		<span>Removed:&nbsp;{data._meta.removal_type}</span>
+		<span>Removed:&nbsp;{removalReason(data._meta.removal_type)}</span>
 	</div>
 	{/if}
 

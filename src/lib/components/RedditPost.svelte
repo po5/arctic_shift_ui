@@ -7,6 +7,11 @@
 	export let data: RedditPostData;
 	export let op: boolean = false;
 	export let newlyRemoved: string|null = null
+
+	function removalReason(reason) {
+		if (reason == "deleted") reason = "deleted by user";
+		return reason;
+	}
 </script>
 
 <div class="pane" class:removed={data.removed_by_category || data._meta?.removal_type || newlyRemoved}>
@@ -40,7 +45,7 @@
 	</div>
 	{#if data.removed_by_category || data._meta?.removal_type || newlyRemoved}
 	<div class="removal-type">
-		<span>Removed:&nbsp;{data.removed_by_category || data._meta?.removal_type || newlyRemoved}</span>
+		<span>Removed:&nbsp;{removalReason(data.removed_by_category || data._meta?.removal_type || newlyRemoved)}</span>
 	</div>
 	{/if}
 </div>
