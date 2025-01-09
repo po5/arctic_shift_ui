@@ -61,9 +61,9 @@
 		return randStr;
 	}
 
-	async function oauth2Request(path, id, options = {}) {
+	async function oauth2Request(path, id, forced = false, options = {}) {
 		if (!accessToken) return;
-		if (id in newlyRemoved) return;
+		if (id in newlyRemoved && !forced) return;
 		const parameters = new URLSearchParams();
 		parameters.append("sr_detail", "true")
 		parameters.append("raw_json", "1");
@@ -78,6 +78,7 @@
 		const json = await response.json();
 		const post = json[0].data.children[0].data;
 		newlyRemoved[id] = post.removed_by_category || post._meta?.removal_type || (post.author == "[deleted]" && post.author);
+		if (forced) posts = [post];
 	}
 
 	getAccessToken();
@@ -272,6 +273,7 @@
 				posts = data.data;
 				if (fun == Function.ThreadSearch) {
 					linkId = url.replace(/.*?\/comments\//, "").replace(/\/.*/, "")
+					if (posts !== null && posts.length == 0) oauth2Request(url.replace(/.*?\/r\//, "/r/"), linkId, true)
 					parentId = "0"
 					// TODO: don't override global values here ^
 					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch)
