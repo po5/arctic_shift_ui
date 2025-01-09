@@ -77,7 +77,7 @@
 		const response = await fetch(`https://oauth.reddit.com${path}?${parameters.toString()}`, fetchOptions);
 		const json = await response.json();
 		const post = json[0].data.children[0].data;
-		newlyRemoved[id] = post.removed_by_category || post._meta?.removal_type;
+		newlyRemoved[id] = post.removed_by_category || post._meta?.removal_type || (post.author == "[deleted]" && post.author);
 	}
 
 	getAccessToken();

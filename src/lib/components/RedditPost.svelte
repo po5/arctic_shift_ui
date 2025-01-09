@@ -9,12 +9,12 @@
 	export let newlyRemoved: string|null = null
 
 	function removalReason(reason) {
-		if (reason == "deleted") reason = "deleted by user";
+		if (reason == "deleted" || reason == "[deleted]") reason = "deleted by user";
 		return reason;
 	}
 </script>
 
-<div class="pane" class:removed={data.removed_by_category || data._meta?.removal_type || newlyRemoved}>
+<div class="pane" class:removed={data.removed_by_category || data._meta?.removal_type || newlyRemoved || (data.author == "[deleted]" && data.author)}>
 	<div class="header">
 		<span class="op" class:shown={op}>(OP) </span>
 		<a href={`https://www.reddit.com/r/${data.subreddit}`} target="_blank">r/{data.subreddit} </a>
@@ -45,9 +45,9 @@
 		<a href={`https://www.reddit.com${data.permalink}`} target="_blank" class="long-url">{`https://reddit.com${data.permalink}`}</a>
 		<a href={`/search?fun=thread_search&limit=10&sort=desc&url=https%3A%2F%2Fwww.reddit.com${encodeURIComponent(data.permalink.replace(/(\/comments\/[^/]+\/).*/, '$1'))}`} target="_blank" class="thread-view">[T]</a>
 	</div>
-	{#if data.removed_by_category || data._meta?.removal_type || newlyRemoved}
+	{#if data.removed_by_category || data._meta?.removal_type || newlyRemoved || (data.author == "[deleted]" && data.author)}
 	<div class="removal-type">
-		<span>Removed:&nbsp;{removalReason(data.removed_by_category || data._meta?.removal_type || newlyRemoved)}</span>
+		<span>Removed:&nbsp;{removalReason(data.removed_by_category || data._meta?.removal_type || newlyRemoved || (data.author == "[deleted]" && data.author))}</span>
 	</div>
 	{/if}
 </div>
