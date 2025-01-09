@@ -25,6 +25,7 @@
 		<span>{data.score} 🠉</span>
 		<span> | </span>
 		<span>{data.num_comments} 💬</span>
+		<span class="flair" style="background-color: {data.link_flair_background_color}">{data.link_flair_text || ""}</span>
 	</div>
 	<div class="title long-text">{data.title}</div>
 	{#if data.url && !data.url.endsWith(data.permalink)}
@@ -135,5 +136,15 @@
 	.long-text {
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+
+	.flair {
+		float: right;
+		padding-left: 0.5rem;
+		padding-right: 0.5rem;
+		border-radius: 0.5rem;
+		background: var(--code-bg);
+		text-shadow: 0 0 .1em black, 0 0 .1em black, 0 0 .1em black, 0 0 0.5em black;
+		color: white;
 	}
 </style>
