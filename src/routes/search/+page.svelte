@@ -24,6 +24,7 @@
 	const clientId = "syqnq8auSEvxwe2Crb1u";
 	let accessToken = null;
 	let newlyRemoved = {};
+	let cachedOPs = {};
 
 	async function fetchRedditAuth(bodyParams, additionalHeaders = {}) {
 		try {
@@ -64,6 +65,10 @@
 	async function oauth2Request(path, id, forced = false, options = {}) {
 		if (!accessToken) return;
 		if (id in newlyRemoved && !forced) return;
+		if (forced && id in cachedOPs) {
+			posts = [cachedOPs[id]];
+			return;
+		}
 		const parameters = new URLSearchParams();
 		parameters.append("sr_detail", "true")
 		parameters.append("raw_json", "1");
@@ -78,7 +83,10 @@
 		const json = await response.json();
 		const post = json[0].data.children[0].data;
 		newlyRemoved[id] = post.removed_by_category || post._meta?.removal_type || (post.author == "[deleted]" && post.author);
-		if (forced) posts = [post];
+		if (forced) {
+			cachedOPs[id] = post;
+			posts = [post];
+		}
 	}
 
 	getAccessToken();
