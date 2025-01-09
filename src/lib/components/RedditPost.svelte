@@ -23,6 +23,8 @@
 		<span><DateDisplay date={new Date(data.created_utc * 1000)} /></span>
 		<span> | </span>
 		<span>{data.score} 🠉</span>
+		<span> | </span>
+		<span>{data.num_comments} 💬</span>
 	</div>
 	<div class="title long-text">{data.title}</div>
 	{#if data.url && !data.url.endsWith(data.permalink)}
