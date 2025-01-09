@@ -83,6 +83,10 @@ blockquote {
 	}
 }
 
+.md a {
+	white-space: normal;
+}
+
 input[type="checkbox"] {
 	display: none;
 
