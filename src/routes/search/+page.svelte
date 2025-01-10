@@ -92,6 +92,7 @@
 	getAccessToken();
 
 	let fun = Function.PostsSearch;
+	let searchFun = fun;
 	// search parameters
 	let subreddit = "";
 	let author = "";
@@ -152,10 +153,17 @@
 		return null;
 	}
 
+	function verifyUrl(text: string): string|null {
+		return text.length == 0 || (text.length > 2 && !text.match(/^[a-zA-Z0-9_]+$/))
+		? (fun === Function.ThreadSearch && text.length == 0 ? "Required" : null)
+		: "Invalid URL";
+	}
+
 	async function search(_: any, clearPrevious = true, activeFun: any = null) {
 		if (clearPrevious)
 			previousHistory = [];
 		activeFun = activeFun ?? fun;
+		searchFun = fun;
 		error = null;
 		loading = true;
 		const params = new URLSearchParams();
@@ -482,12 +490,21 @@
 					label="Selftext (only with 'Author' or 'Subreddit')"
 				/>
 			</div>
+			{#if fun === Function.PostsSearch}
 			<TextField
 				bind:text={url}
 				label="URL (prefix match)"
 				transform={(text) => text.replace(/^\/?u(ser)?\//g, "")}
-				getError={(text) => text.length == 0 || text.length > 2 && !text.match(/^[a-zA-Z0-9_]+$/) ? null : "Invalid URL"}
+				getError={verifyUrl}
 			/>
+			{:else}
+			<TextField
+				bind:text={url}
+				label="URL (prefix match)"
+				transform={(text) => text.replace(/^\/?u(ser)?\//g, "")}
+				getError={verifyUrl}
+			/>
+			{/if}
 			<div class="row">
 				<OptionSelector
 					label="NSFW"
@@ -547,12 +564,13 @@
 			{#if fun === Function.PostsSearch && posts?.length || fun === Function.CommentsSearch && comments?.length || fun === Function.ThreadSearch && posts?.length}
 				<button
 					class="submit-button secondary"
+					disabled={fun === Function.ThreadSearch && !url}
 					on:click={download}
 				>Download</button>
 			{/if}
 			<button
 				class="submit-button"
-				disabled={loading}
+				disabled={loading || (fun === Function.ThreadSearch && !url)}
 				on:click={search}
 			>Search</button>
 		</div>
@@ -565,7 +583,7 @@
 		<Preferences/>
 	{/if}
 
-	{#if currentData}
+	{#if currentData && searchFun == fun}
 		<div class="pagination">
 			<button
 				class="submit-button"
@@ -581,7 +599,7 @@
 	{/if}
 
 	<div class="results" class:loading={loading}>
-		{#if fun === Function.PostsSearch && posts !== null}
+		{#if fun === Function.PostsSearch && posts !== null && searchFun == fun}
 			{#if posts.length == 0}
 				<p>Nothing found o_O</p>
 			{/if}
@@ -595,7 +613,7 @@
 			{#each comments as comment (comment.id)}
 				<RedditComment data={comment} />
 			{/each}
-		{:else if fun === Function.ThreadSearch && posts !== null}
+		{:else if fun === Function.ThreadSearch && posts !== null && searchFun == fun}
 			{#if posts.length == 0}
 				<p>No OP found.</p>
 			{/if}
@@ -613,7 +631,7 @@
 		{/if}
 	</div>
 
-	{#if currentData && currentData.length > 5}
+	{#if currentData && currentData.length > 5 && searchFun == fun}
 		<div class="pagination">
 			<button
 				class="submit-button"

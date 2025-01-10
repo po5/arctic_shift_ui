@@ -19,12 +19,14 @@
 		if (transform)
 			newText = transform(newText);
 		error = getError(newText);
+		text = newText;
 		if (error)
 			return;
-		text = newText;
 		if (onChange)
 			onChange(text);
 	}
+
+	error = getError(text);
 </script>
 
 <label class="text-field">
