@@ -299,7 +299,7 @@
 			}
 			else if (activeFun == Function.CommentsSearch) {
 				comments = data.data;
-				if (comments) {
+				if (fun == Function.ThreadSearch && comments) {
 					for (const comment of comments) {
 						if (!(comment.id in replies)) {
 							// TODO: proper dedupe for when we allow loading extra replies
