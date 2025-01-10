@@ -94,7 +94,6 @@
 		white-space: nowrap;
 		width: 100%;
 		display: inline-block;
-		padding-right: 1rem;
 	}
 
 	.long-text {
