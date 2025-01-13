@@ -81,6 +81,14 @@
 		};
 		const response = await fetch(`https://oauth.reddit.com${path}?${parameters.toString()}`, fetchOptions);
 		const json = await response.json();
+		if (!json) {
+			console.error("Unknown Reddit API error");
+			return;
+		}
+		if (json.error) {
+			console.error("Reddit API error", json.error, json.reason);
+			return;
+		}
 		const post = json[0].data.children[0].data;
 		newlyRemoved[id] = post.removed_by_category || post._meta?.removal_type || (post.author == "[deleted]" && post.author);
 		if (forced) {
@@ -295,6 +303,7 @@
 						}
 					}
 					if (posts !== null && (posts.length == 0 || posts[0].id !== linkId)) oauth2Request(url.replace(/.*?\/r\//, "/r/"), linkId, true)
+					if (posts.length != 0) posts = [posts[0]]
 					parentId = "0"
 					// TODO: don't override global values here ^
 					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch)
