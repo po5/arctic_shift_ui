@@ -296,17 +296,17 @@
 			if (activeFun == Function.PostsSearch || activeFun == Function.ThreadSearch) {
 				posts = data.data;
 				if (fun == Function.ThreadSearch) {
-					linkId = url.replace(/.*?\/comments\//, "").replace(/\/.*/, "")
+					linkId = url.replace(/.*?\/comments\//, "").replace(/\/.*/, "");
 					for (const post of posts) {
 						if (post.id == linkId) {
 							posts = [post];
 						}
 					}
-					if (posts !== null && (posts.length == 0 || posts[0].id !== linkId)) oauth2Request(url.replace(/.*?\/r\//, "/r/"), linkId, true)
-					if (posts.length != 0) posts = [posts[0]]
+					if (posts !== null && (posts.length == 0 || posts[0].id !== linkId)) oauth2Request(url.replace(/.*?\/r\//, "/r/"), linkId, true);
+					if (posts.length != 0) posts = [posts[0]];
 					parentId = "0"
 					// TODO: don't override global values here ^
-					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch)
+					search({parentLinkId: linkId, parentCommentId: ""}, false, Function.CommentsSearch);
 				}
 				for (const post of posts) {
 					if (!(post.removed_by_category || post._meta?.removal_type)) {
@@ -320,7 +320,7 @@
 					for (const comment of comments) {
 						if (!(comment.id in replies)) {
 							// TODO: proper dedupe for when we allow loading extra replies
-							search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch)
+							search({parentLinkId: _?.parentLinkId, parentCommentId: comment.id}, false, Function.RepliesSearch);
 						}
 					}
 				}
@@ -331,7 +331,7 @@
 					replies[_?.parentCommentId] = [];
 					for (const reply of replyData) {
 						replies[_?.parentCommentId].push(reply);
-						search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id}, false, Function.RepliesSearch)
+						search({parentLinkId: _?.parentLinkId, parentCommentId: reply.id}, false, Function.RepliesSearch);
 					}
 				}
 			}
