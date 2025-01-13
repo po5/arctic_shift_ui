@@ -423,9 +423,9 @@
 		<div class="gap"></div>
 		<OptionSelector
 			options={[
-				{ value: Function.PostsSearch, label: "Posts Search" },
-				{ value: Function.CommentsSearch, label: "Comments Search" },
-				{ value: Function.ThreadSearch, label: "Thread Search" },
+				{ value: Function.PostsSearch, label: "Posts" },
+				{ value: Function.CommentsSearch, label: "Comments" },
+				{ value: Function.ThreadSearch, label: "Thread" },
 				// { value: Function.PostIds, label: "Post IDs" },
 				// { value: Function.CommentIds, label: "Comment IDs" },
 			]}

@@ -55,6 +55,7 @@
 
 <style lang="scss">
 	.header {
+		overflow: auto;
 		a {
 			color: var(--primary);
 		}
@@ -92,6 +93,8 @@
 	.removed > .reddit-link {
 		border-top-left-radius: 0.5rem;
 		border-top-right-radius: 0.5rem;
+		padding-bottom: 1px;
+		margin-bottom: -1px;
 	}
 
 	.removal-type {
